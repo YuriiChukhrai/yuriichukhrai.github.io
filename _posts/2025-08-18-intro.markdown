@@ -1,0 +1,25 @@
+---
+layout: post
+title:  "Intro"
+date:   2025-08-18 22:16:00 -0700
+categories: fast.ai
+---
+
+# A Note from a New Learner
+
+The world of machine learning can seem daunting — a vast ocean of complex theories and endless equations.  
+But as I've recently discovered, perhaps the best way to navigate these waters isn't by poring over textbooks, but by simply diving in.
+
+My own journey was inspired by the advice of **Grigory Bakunov**, and now I'm following a **top-down approach** to learning deep learning with the [Practical Deep Learning for Coders 2022 Part 1](https://course.fast.ai) course from **fast.ai**.  
+The course, authored by **Jeremy Howard**, is a refreshing departure from the traditional, theory-first method.  
+It emphasizes *learning by doing*, encouraging students to build projects and get their hands dirty with code right from the start.
+
+In his ["Lesson 0" introductory lecture on YouTube](https://www.youtube.com/watch?v=gGxe2mN3kAg), Jeremy Howard shares a powerful piece of advice for all aspiring learners: **start a blog**.  
+A blog, he explains, is more than just a place to share your work; it's a tool for tracking your challenges, breakthroughs, and ideas. It's a personal portfolio, a place to contribute to the community, and a way to cement your understanding by articulating your thoughts.
+
+This blog is my response to that call.  
+It is my space to document this incredible journey, to share my projects, and to explore the fascinating world of deep learning.
+
+I hope you'll follow along as I learn, experiment, and, hopefully, build something amazing.
+
+
