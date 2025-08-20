@@ -1,0 +1,171 @@
+---
+layout: post
+title: "Chapter 1 — Notes from 01_intro.ipynb"
+date:   2025-08-18 22:16:00 -0700
+categories: fastai
+---
+
+
+
+
+
+# Chapter 1 — (01_intro.ipynb)
+
+This post is my short record of the first steps with the **fastai course notebooks**.  
+I try to keep notes simple — just actions, small experiments, and what worked or failed.  
+
+---
+
+## 1. Cloning and Starting
+
+I began with cloning the repository and opening the first notebook ([fastbook/01_intro.ipynb](https://github.com/fastai/fastbook/blob/master/01_intro.ipynb)):
+
+```bash
+👉 
+
+Then I followed instructions from [fastsetup](https://github.com/AnswerDotAI/fastsetup) and created a local environment (Python, Conda, Jupyter, etc.) on my **Mac Studio (Apple M1 Ultra - 128 GB)**.  
+This setup gave me the ability to run notebooks locally, without relying on cloud services.
+
+`fastbook/environment_gpu.yml`
+```text
+name: fastai_gpu
+channels:
+  - fastai
+  - pytorch
+  - defaults
+dependencies:
+  - python=3.12 # Specify a Python version fully supported by PyTorch for MPS (e.g., 3.11 or 3.12)
+  - jupyter
+  - pytorch # No version constraint here, let conda figure out the compatible MPS version
+  - torchvision # No version constraint, let conda figure it out
+  - torchaudio # Add torchaudio for completeness, also from pytorch channel
+  - matplotlib
+  - pandas
+  - requests
+  - pyyaml
+  - fastprogress>=0.1.22
+  - pillow
+  - scikit-learn
+  - scipy
+  - notebook
+  - spacy
+  - pip
+  - pip:
+    - graphviz
+    - fastbook
+```
+
+Pre-requisites - it's execute script [fastsetup/setup-conda.sh](https://github.com/AnswerDotAI/fastsetup/blob/master/setup-conda.sh) to install Conda.
+
+Then I created the environment with the following commands:
+
+```bash
+conda env create --file environment_gpu.yml
+conda activate fastai_gpu
+conda install notebook
+jupyter notebook
+```
+
+Opening local Jupyter Notebook server in the browser.
+<img src="/resources/images/chapter1/0_jupyter-notebook.jpg" alt="jupyter notebook local server" style="width: 100%; max-width: 800px;" />
+
+
+
+
+---
+
+## 2. Checking Apple M1 GPU (MPS)
+
+The first test was to check if PyTorch can see the **M1 GPU (MPS backend)**:
+
+```python
+import torch
+import os
+
+# Just for any potential issues with MPS fallback
+os.environ['PYTORCH_ENABLE_MPS_FALLBACK'] = '1'
+
+# Check Apple M1 GPU
+if torch.backends.mps.is_available():
+    mps_device = torch.device("mps")
+    x = torch.ones(1, device=mps_device)
+    print(f"Tensor on MPS device: {x}")
+    print(f"MPS device found: {torch.backends.mps.is_available()}")
+    print(f"MPS device built: {torch.backends.mps.is_built()}")
+else:
+    print("MPS device not found or not available.")
+    if not torch.backends.mps.is_built():
+        print("PyTorch was not built with MPS support.")
+    else:
+        print("macOS version is not 12.3+ or no MPS-enabled device.")
+```
+
+
+
+
+
+Output confirmed that MPS was available.
+
+---
+
+## 3. First Problem — Fine Tuning Fails
+
+First Problem — Fine Tuning Fails
+When I tried to run the IMDB text classification example
+
+```python
+from fastai.text.all import *
+
+dls = TextDataLoaders.from_folder(untar_data(URLs.IMDB), valid='test', bs=32)
+learn = text_classifier_learner(dls, AWD_LSTM, drop_mult=0.5, metrics=accuracy)
+learn.fine_tune(4, 1e-2)
+```
+The Jupyter kernel crashed immediately.
+Even reducing it to just one epoch:
+```python
+learn.fine_tune(1, 1e-2)
+```
+…did not help.
+I also tried smaller batch sizes (bs=32 → 16) and even running only on CPU → still failed. No logs, no evidence in Jupyter server logs.
+
+<img src="/resources/images/chapter1/02_kernel_restart.jpg" alt="kernel restart" style="width: 100%; max-width: 800px;" />
+
+---
+
+## 4. Trying Learning Rate Finder
+I tried adjusting the learning rate with:
+```python
+learn.lr_find()
+```
+<img src="/resources/images/chapter1/01_valley.png" alt="Learning Rate Finder" style="width: 100%; max-width: 800px;" />
+
+and then:
+```python
+learn.fine_tune(1, 1e-3)  # lowering lerning rate
+```
+
+Still no luck — the kernel kept restarting.
+Batch sizes (16, 8, 4, 2) made no difference.
+
+## 5. Alternative Approach — One Cycle Training
+Since fine-tuning failed, I switched to direct training with fit_one_cycle:
+```python
+from fastai.text.all import *
+
+dls = TextDataLoaders.from_folder(untar_data(URLs.IMDB), valid='test', bs=32)
+learn = text_classifier_learner(dls, AWD_LSTM, drop_mult=0.5, metrics=accuracy)
+# learn.fine_tune(4, 1e-3)
+learn.fit_one_cycle(2, 1e-2)
+```
+
+This worked fine. Training completed without issues.
+
+---
+
+## Summary
+
+* Environment installed successfully on **Apple M1 Ultra**
+* GPU (MPS) detected and working
+* `learn.fine_tune` consistently crashed kernel
+* `learn.fit_one_cycle` worked well
+* The rest of the notebook examples ran without issues
