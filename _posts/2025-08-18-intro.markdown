@@ -2,7 +2,7 @@
 layout: post
 title:  "Intro"
 date:   2025-08-18 22:16:00 -0700
-categories: fast.ai
+categories: fastai
 ---
 
 # A Note from a New Learner
