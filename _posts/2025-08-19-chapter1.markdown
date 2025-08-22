@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Chapter 1 — Notes from 01_intro.ipynb"
+title: "Chapter 1 — Intro"
 date:   2025-08-18 22:16:00 -0700
 categories: fastai
 ---
@@ -9,7 +9,7 @@ categories: fastai
 
 
 
-# Chapter 1 — (01_intro.ipynb)
+# Chapter 1 — (fastbook/01_intro.ipynb)
 
 This post is my short record of the first steps with the **fastai course notebooks**.  
 I try to keep notes simple — just actions, small experiments, and what worked or failed.  

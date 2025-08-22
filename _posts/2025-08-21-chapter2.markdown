@@ -1,0 +1,232 @@
+---
+layout: post
+title: "Chapter 2 — Production"
+date:   2025-08-21 23:24:00 -0700
+categories: fastai
+---
+
+# Chapter 2 — (fastbook/02_production.ipynb)
+
+This blog post is based on the second chapter of **fastai’s course** and my own experiments while following along.  
+The original Jupyter notebook can be found here: [fastbook/02_production.ipynb](https://github.com/fastai/fastbook/blob/master/02_production.ipynb)
+
+---
+
+## 2.1 Lesson Completed
+I finished the second lesson (**Deployment**) from Jeremy Howard: [Lesson 2](https://course.fast.ai/Lessons/lesson2.html)
+
+It was finally time to deploy my first demo using **HuggingFace Spaces** and **Gradio** 🚀.
+
+---
+
+## 2.2 First Model (Cats vs Dogs 🐱🐶)
+Following the YouTube lecture - [Lesson 2: Practical Deep Learning for Coders 2022. YouTube](https://www.youtube.com/watch?v=F4tvM4Vb3A0)
+
+I trained a **small model** that can classify whether an image is a **cat** or a **dog**.
+
+Here’s a snippet of the training code.
+
+
+Enable the MCP (for GPU):
+```python
+import torch
+import os
+
+os.environ['PYTORCH_ENABLE_MPS_FALLBACK'] = '1'
+
+if torch.backends.mps.is_available():
+    mps_device = torch.device("mps")
+    x = torch.ones(1, device=mps_device)
+    print(f"Tensor on MPS device: {x}")
+    print(f"MPS device found: {torch.backends.mps.is_available()}")
+    print(f"MPS device built: {torch.backends.mps.is_built()}")
+else:
+    print("MPS device not found or not available.")
+    if not torch.backends.mps.is_built():
+        print("PyTorch was not built with MPS support.")
+    else:
+        print("macOS version is not 12.3+ or no MPS-enabled device.")
+
+! [ -e /content ] && pip install -Uqq fastbook
+import fastbook
+fastbook.setup_book()
+
+
+from fastbook import *
+
+import fastai
+print(fastai.__version__)
+```
+
+Output will be:
+```text
+Tensor on MPS device: tensor([1.], device='mps:0')
+MPS device found: True
+MPS device built: True
+2.8.4
+```
+
+Let's cut the head.
+I just decided to transform images little bit `RandomResizedCrop(224, min_scale=0.3)` and have couple more epoch `learn.fine_tune(3)`:
+```python
+from fastai.vision.all import *
+pathExport = Path()
+path = untar_data(URLs.PETS)/'images'
+
+def is_cat(x): return x[0].isupper()
+dls = ImageDataLoaders.from_name_func(
+    path, get_image_files(path), valid_pct=0.2, seed=42,
+    label_func=is_cat, item_tfms=RandomResizedCrop(224, min_scale=0.3))
+
+learn = vision_learner(dls, resnet34, metrics=error_rate)
+learn.fine_tune(3)
+
+try:
+    learn.path = Path('~/workspace/fastbook').expanduser()
+    learn.export('model.pkl')
+    print("Model exported successfully! 🎉")
+except Exception as e:
+    print(f"An error occurred during export: {e}")
+```
+Model exported successfully! 🎉
+
+Jeremy Howard’s example demo (from May 3, 2022) is here: [Cat or Dog?](https://huggingface.co/spaces/jph00/testing)  
+Unfortunately, running the same code today doesn’t work anymore.
+This is expected, because HuggingFace + Gradio evolved a lot since then.
+After a few cups of tea ☕ and some debugging, I updated the code and deployed it: [My Cat vs Dog Demo](https://huggingface.co/spaces/limit007/cat_poc).
+
+Thanks to my nephew and friends for testing — and yes, it’s alive! 😄
+
+<img src="/resources/images/chapter2/01_huggingface_cat_vs_dog.jpg" alt="Huggingface. Cat vs Dog" style="width: 100%; max-width: 800px;" />
+
+---
+
+## 2.3 Next Demo (Bear Detector 🐻)
+
+### 2.3.1 Data and Model
+
+The next challenge was building a model to classify three types of bears:
+* Grizzly Bear
+* Black Bear
+* Teddy Bear (the toy 🧸)
+
+But there was a problem...
+The original notebook used Microsoft Azure Bing Web Search API for image collection downloading from internet.
+That API is now deprecated. So I switched to [SerpAPI](https://serpapi.com). To use it:
+* Register to get an API key.
+* Write a utility function to query images with original URL for downloading later.
+
+Here is the code snippet I used to get images URLs:
+```python
+from fastai.vision.all import *
+import json
+import requests
+
+def search_serpapi(key, term):
+     search_url = "https://serpapi.com/search"
+     ims = []
+
+     for page in range(4):
+          params = {'engine': 'bing_images', 'q': term, 'imagesize': 'small', 'photo': 'photo', 'license': 'L1', 'device': 'mobile', 'api_key':key, 'count':'100', 'first':page}
+          response = requests.get(search_url, params=params)
+          response.raise_for_status()
+          search_results = response.json()
+          # Correctly access the list of image results
+          images_results_list = search_results.get('images_results', [])
+          # Use a list comprehension to get the 'original' URL from each item
+          ims.extend(item.get('original') for item in images_results_list if item.get('original'))
+     return ims
+```
+
+Here is the code for Jupyter notebook (very compact version):
+```python
+import os
+os.environ['PYTORCH_ENABLE_MPS_FALLBACK'] = '1'
+key = os.environ.get('SERAPI_KEY', '{your serpapi key here}')
+
+! [ -e /content ] && pip install -Uqq fastbook
+import fastbook
+import my_utils
+from my_utils import search_serpapi
+
+fastbook.setup_book()
+
+from fastbook import *
+from fastai.vision.widgets import *
+
+# Set the default device to MPS for fastai
+if torch.backends.mps.is_available():
+    defaults.device = torch.device('mps')
+    print("Using MPS device.")
+else:
+    print("MPS not available. Falling back to CPU.")
+
+bear_types = 'grizzly','black','teddy'
+path = Path('bears')
+
+if not path.exists():
+    path.mkdir()
+    for bear_type in bear_types:
+        dest = (path/bear_type)
+        dest.mkdir(exist_ok=True)
+        results = search_serpapi(key, f'{bear_type} bear')
+        print(bear_type)
+        #len(results)
+        for my_url in results:
+            try:
+                download_url(my_url, dest)
+            except IOError as e:
+                print(f"Error saving file {my_url}: {e}")
+
+fns = get_image_files(path)
+fns # print for debugging
+
+failed = verify_images(fns)
+failed # print for debugging
+
+failed.map(Path.unlink);
+
+bears = DataBlock(
+    blocks=(ImageBlock, CategoryBlock),
+    get_items=get_image_files,
+    splitter=RandomSplitter(valid_pct=0.2, seed=10),
+    get_y=parent_label,
+    item_tfms=Resize(300))
+
+bears = bears.new(
+    item_tfms=RandomResizedCrop(300, min_scale=0.5),
+    batch_tfms=aug_transforms())
+dls = bears.dataloaders(path)
+
+learn = vision_learner(dls, resnet18, metrics=error_rate)
+learn.fine_tune(7)
+```
+
+### 2.3.2 Training the Bear Model
+
+I trained the model on my Apple Mac Studio (M1 Ultra).
+As usual, I had some MCP issues, so I needed my `pain relief code` workaround `os.environ['PYTORCH_ENABLE_MPS_FALLBACK'] = '1'`.
+
+Dataset used:
+* Black bear: 44 images
+* Grizzly bear: 56 images
+* Teddy bear: 51 images
+
+After fine-tuning, the model was ready.
+
+Some details about the trained model (looks not bad):
+<img src="/resources/images/chapter2/02_confusion_matrix.jpg" alt="confusion matrix" style="width: 100%; max-width: 800px;" />
+
+### 2.3.3 Deploying the Bear Model
+
+I turned my model into an online demo with HuggingFace Spaces + Gradio [Bears Detector Demo](https://huggingface.co/spaces/limit007/bears_detector_poc)
+The deployment worked and was tested successfully.
+<img src="/resources/images/chapter2/03_huggingface_bear_detection.jpg" alt="Huggingface. Bear detection" style="width: 100%; max-width: 800px;" />
+
+---
+
+## Summary
+This chapter was my first real experience with deployment — moving from Jupyter notebooks into something people can actually use online.
+It wasn’t smooth (deprecated APIs, HuggingFace/Gradio changes, M1 Ultra quirks), but I learned a lot about adapting tutorials to the real world.
+
+Stay tuned 👋
