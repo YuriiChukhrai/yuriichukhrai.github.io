@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Chapter 2 — Production"
+title: "fastai. Chapter 2 — Production"
 date:   2025-08-21 23:24:00 -0700
 categories: fastai
 ---
