@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Chapter 1 — Intro"
+title: "fastai. Chapter 1 — Intro"
 date:   2025-08-18 22:16:00 -0700
 categories: fastai
 ---
