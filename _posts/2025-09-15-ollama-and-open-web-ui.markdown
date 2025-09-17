@@ -56,7 +56,7 @@ ollama run gpt-oss:20b "To be or not to be?"
 ```
 The response confirmed that Ollama was up and running. While the command line works well for simple prompts, I quickly realized it wasn’t the best environment for longer interactions.
 
-<img src="/resources/sdet/2025-09-15-ollama-and-open-web-ui/images/question_01.jpg" alt="Question#1 (gpt-oss:20b)" style="width: 100%; max-width: 800px;" />
+<img src="/resources/sdet/2025-09-15-ollama-and-open-web-ui/images/question_01.jpg" alt="Question#1 (gpt-oss:20b)" style="width: 100%; max-width: 1200px;" />
 
 ---
 
@@ -74,9 +74,9 @@ docker run -d -p 3000:8080 \
   ghcr.io/open-webui/open-webui:main
 ```
 
-Opening http://localhost:3000 in the browser made all the difference.
+Opening `http://localhost:3000` in the browser made all the difference.
 
-<img src="/resources/sdet/2025-09-15-ollama-and-open-web-ui/images/question_02.jpg" alt="Question#2 (Open WebUI + gpt-oss:20b)" style="width: 100%; max-width: 800px;" />
+<img src="/resources/sdet/2025-09-15-ollama-and-open-web-ui/images/question_02.jpg" alt="Question#2 (Open WebUI + gpt-oss:20b)" style="width: 100%; max-width: 1200px;" />
 
 The answer in the second attempt different (interesting why? - float on GPU?).
 
@@ -85,13 +85,13 @@ The answer in the second attempt different (interesting why? - float on GPU?).
 My favorite question to test models is: "What do you know about me (Yurii Chukhrai)?".
 
 ### gpt-oss:20b
-<img src="/resources/sdet/2025-09-15-ollama-and-open-web-ui/images/question_06.jpg" alt="Question#6 (Open WebUI + gpt-oss:20b)" style="width: 100%; max-width: 800px;" />
+<img src="/resources/sdet/2025-09-15-ollama-and-open-web-ui/images/question_06.jpg" alt="Question#6 (Open WebUI + gpt-oss:20b)" style="width: 100%; max-width: 1200px;" />
 
 ### deepseek-v2:16b
-<img src="/resources/sdet/2025-09-15-ollama-and-open-web-ui/images/question_03.jpg" alt="Question#4 (Open WebUI + deepseek-v2:16b)" style="width: 100%; max-width: 800px;" />
+<img src="/resources/sdet/2025-09-15-ollama-and-open-web-ui/images/question_03.jpg" alt="Question#4 (Open WebUI + deepseek-v2:16b)" style="width: 100%; max-width: 1200px;" />
 
 ### deepseek-r1:70b
-<img src="/resources/sdet/2025-09-15-ollama-and-open-web-ui/images/question_04.jpg" alt="Question#5 (Open WebUI + deepseek-r1:70b)" style="width: 100%; max-width: 800px;" />
+<img src="/resources/sdet/2025-09-15-ollama-and-open-web-ui/images/question_04.jpg" alt="Question#5 (Open WebUI + deepseek-r1:70b)" style="width: 100%; max-width: 1200px;" />
 
 More power for hallucinations, so sad :).
 
