@@ -67,7 +67,7 @@ jupyter notebook
 ```
 
 Opening local Jupyter Notebook server in the browser.
-<img src="/resources/ml/2025-08-19-chapter1/images/00_jupyter-notebook.jpg" alt="jupyter notebook local server" style="width: 100%; max-width: 800px;" />
+<img src="/resources/ml/2025-08-19-chapter1/images/00_jupyter-notebook.jpg" alt="jupyter notebook local server" style="width: 100%; max-width: 1200px;" />
 
 
 
@@ -128,7 +128,7 @@ learn.fine_tune(1, 1e-2)
 …did not help.
 I also tried smaller batch sizes (bs=32 → 16) and even running only on CPU → still failed. No logs, no evidence in Jupyter server logs.
 
-<img src="/resources/ml/2025-08-19-chapter1/images/02_kernel_restart.jpg" alt="kernel restart" style="width: 100%; max-width: 800px;" />
+<img src="/resources/ml/2025-08-19-chapter1/images/02_kernel_restart.jpg" alt="kernel restart" style="width: 100%; max-width: 1200px;" />
 
 ---
 
@@ -137,7 +137,7 @@ I tried adjusting the learning rate with:
 ```python
 learn.lr_find()
 ```
-<img src="/resources/ml/2025-08-19-chapter1/images/01_valley.png" alt="Learning Rate Finder" style="width: 100%; max-width: 800px;" />
+<img src="/resources/ml/2025-08-19-chapter1/images/01_valley.png" alt="Learning Rate Finder" style="width: 100%; max-width: 1200px;" />
 
 and then:
 ```python
