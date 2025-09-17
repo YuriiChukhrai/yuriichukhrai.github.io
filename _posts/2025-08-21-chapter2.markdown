@@ -97,7 +97,7 @@ After a few cups of tea ☕ and some debugging, I updated the code and deployed 
 
 Thanks to my nephew and friends for testing — and yes, it’s alive! 😄
 
-<img src="/resources/images/chapter2/01_huggingface_cat_vs_dog.jpg" alt="Huggingface. Cat vs Dog" style="width: 100%; max-width: 800px;" />
+<img src="/resources/ml/2025-08-21-chapter2/images/01_huggingface_cat_vs_dog.jpg" alt="Huggingface. Cat vs Dog" style="width: 100%; max-width: 800px;" />
 
 ---
 
