@@ -97,7 +97,7 @@ After a few cups of tea ☕ and some debugging, I updated the code and deployed 
 
 Thanks to my nephew and friends for testing — and yes, it’s alive! 😄
 
-<img src="/resources/images/chapter2/01_huggingface_cat_vs_dog.jpg" alt="Huggingface. Cat vs Dog" style="width: 100%; max-width: 800px;" />
+<img src="/resources/ml/2025-08-21-chapter2/images/01_huggingface_cat_vs_dog.jpg" alt="Huggingface. Cat vs Dog" style="width: 100%; max-width: 1200px;" />
 
 ---
 
@@ -215,13 +215,13 @@ Dataset used:
 After fine-tuning, the model was ready.
 
 Some details about the trained model (looks not bad):
-<img src="/resources/images/chapter2/02_confusion_matrix.jpg" alt="confusion matrix" style="width: 100%; max-width: 800px;" />
+<img src="/resources/images/chapter2/02_confusion_matrix.jpg" alt="confusion matrix" style="width: 100%; max-width: 1200px;" />
 
 ### 2.3.3 Deploying the Bear Model
 
 I turned my model into an online demo with HuggingFace Spaces + Gradio [Bears Detector Demo](https://huggingface.co/spaces/limit007/bears_detector_poc)
 The deployment worked and was tested successfully.
-<img src="/resources/images/chapter2/03_huggingface_bear_detection.jpg" alt="Huggingface. Bear detection" style="width: 100%; max-width: 800px;" />
+<img src="/resources/images/chapter2/03_huggingface_bear_detection.jpg" alt="Huggingface. Bear detection" style="width: 100%; max-width: 1200px;" />
 
 ---
 
