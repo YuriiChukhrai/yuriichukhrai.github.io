@@ -1,8 +1,11 @@
 ---
 layout: post
 title: "SDET. Old Jenkins instance. Docker compose"
+subtitle: Bringing up old Jenkins backup with Docker
 date:   2025-08-23 23:25:00 -0700
 categories: sdet
+tags: [jenkins, docker, docker-compose, java8, ci-cd]
+author: Yurii Chukhrai
 ---
 
 # Bring up old Jenkins backup
