@@ -1,13 +1,12 @@
 ---
 layout: post
 title: "fastai. Chapter 1 — Intro"
+subtitle: Setting up fastai on Apple Silicon, first experiments, and troubleshooting
 date:   2025-08-18 22:16:00 -0700
 categories: fastai
+tags: [fastai, apple-silicon, m1, pytorch, jupyter, conda, troubleshooting, machine-learning]
+author: Yurii Chukhrai
 ---
-
-
-
-
 
 # Chapter 1 — (fastbook/01_intro.ipynb)
 
@@ -22,7 +21,6 @@ I began with cloning the repository and opening the first notebook ([fastbook/01
 
 ```bash
 👉 
-
 Then I followed instructions from [fastsetup](https://github.com/AnswerDotAI/fastsetup) and created a local environment (Python, Conda, Jupyter, etc.) on my **Mac Studio (Apple M1 Ultra - 128 GB)**.  
 This setup gave me the ability to run notebooks locally, without relying on cloud services.
 
@@ -30,6 +28,7 @@ This setup gave me the ability to run notebooks locally, without relying on clou
 ```text
 name: fastai_gpu
 channels:
+  - conda-forge
   - fastai
   - pytorch
   - defaults
@@ -51,8 +50,11 @@ dependencies:
   - spacy
   - pip
   - pip:
-    - graphviz
     - fastbook
+    - ipywidgets
+    - plotly
+    - graphviz
+    - anywidget
 ```
 
 Pre-requisites - it's execute script [fastsetup/setup-conda.sh](https://github.com/AnswerDotAI/fastsetup/blob/master/setup-conda.sh) to install Conda.
@@ -63,14 +65,12 @@ Then I created the environment with the following commands:
 conda env create --file environment_gpu.yml
 conda activate fastai_gpu
 conda install notebook
-jupyter notebook
+jupyter notebook --no-browser
 ```
 
-Opening local Jupyter Notebook server in the browser.
-<img src="/resources/ml/2025-08-19-chapter1/images/00_jupyter-notebook.jpg" alt="jupyter notebook local server" style="width: 100%; max-width: 1200px;" />
+Opening local Jupyter Notebook server in the browser `http://localhost:8888`.
 
-
-
+![jupyter notebook local server](/resources/ml/2025-08-19-chapter1/images/00_jupyter-notebook.jpg){: .mx-auto.d-block :}
 
 ---
 
@@ -100,10 +100,6 @@ else:
         print("macOS version is not 12.3+ or no MPS-enabled device.")
 ```
 
-
-
-
-
 Output confirmed that MPS was available.
 
 ---
@@ -128,7 +124,8 @@ learn.fine_tune(1, 1e-2)
 …did not help.
 I also tried smaller batch sizes (bs=32 → 16) and even running only on CPU → still failed. No logs, no evidence in Jupyter server logs.
 
-<img src="/resources/ml/2025-08-19-chapter1/images/02_kernel_restart.jpg" alt="kernel restart" style="width: 100%; max-width: 1200px;" />
+![kernel restart](/resources/ml/2025-08-19-chapter1/images/02_kernel_restart.jpg){: .mx-auto.d-block :}
+
 
 ---
 
@@ -137,7 +134,8 @@ I tried adjusting the learning rate with:
 ```python
 learn.lr_find()
 ```
-<img src="/resources/ml/2025-08-19-chapter1/images/01_valley.png" alt="Learning Rate Finder" style="width: 100%; max-width: 1200px;" />
+
+![Learning Rate Finder](/resources/ml/2025-08-19-chapter1/images/01_valley.png){: .mx-auto.d-block :}
 
 and then:
 ```python

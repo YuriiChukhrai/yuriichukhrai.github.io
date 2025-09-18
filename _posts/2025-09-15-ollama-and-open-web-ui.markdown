@@ -1,8 +1,11 @@
 ---
 layout: post
 title: "SDET. Running Ollama with Open WebUI: First Steps and Impressions"
+subtitle: Exploring Local LLMs with a User-Friendly Interface
 date:   2025-09-15 23:15:00 -0700
 categories: sdet
+tags: [ollama, deepseek, gpt-oss]
+author: Yurii Chukhrai
 ---
 
 ## Introduction
@@ -56,8 +59,7 @@ ollama run gpt-oss:20b "To be or not to be?"
 ```
 The response confirmed that Ollama was up and running. While the command line works well for simple prompts, I quickly realized it wasn’t the best environment for longer interactions.
 
-<img src="/resources/sdet/2025-09-15-ollama-and-open-web-ui/images/question_01.jpg" alt="Question#1 (gpt-oss:20b)" style="width: 100%; max-width: 1200px;" />
-
+![Question#1](/resources/sdet/2025-09-15-ollama-and-open-web-ui/images/question_01.jpg){: .mx-auto.d-block :}
 ---
 
 ## Adding a User Interface: Open WebUI
@@ -76,7 +78,8 @@ docker run -d -p 3000:8080 \
 
 Opening `http://localhost:3000` in the browser made all the difference.
 
-<img src="/resources/sdet/2025-09-15-ollama-and-open-web-ui/images/question_02.jpg" alt="Question#2 (Open WebUI + gpt-oss:20b)" style="width: 100%; max-width: 1200px;" />
+
+![Question#2](/resources/sdet/2025-09-15-ollama-and-open-web-ui/images/question_02.jpg){: .mx-auto.d-block :}
 
 The answer in the second attempt different (interesting why? - float on GPU?).
 
@@ -85,15 +88,15 @@ The answer in the second attempt different (interesting why? - float on GPU?).
 My favorite question to test models is: "What do you know about me (Yurii Chukhrai)?".
 
 ### gpt-oss:20b
-<img src="/resources/sdet/2025-09-15-ollama-and-open-web-ui/images/question_06.jpg" alt="Question#6 (Open WebUI + gpt-oss:20b)" style="width: 100%; max-width: 1200px;" />
+![Question#6](/resources/sdet/2025-09-15-ollama-and-open-web-ui/images/question_06.jpg){: .mx-auto.d-block :}
 
 ### deepseek-v2:16b
-<img src="/resources/sdet/2025-09-15-ollama-and-open-web-ui/images/question_03.jpg" alt="Question#4 (Open WebUI + deepseek-v2:16b)" style="width: 100%; max-width: 1200px;" />
+![Question#3](/resources/sdet/2025-09-15-ollama-and-open-web-ui/images/question_03.jpg){: .mx-auto.d-block :}
 
 ### deepseek-r1:70b
-<img src="/resources/sdet/2025-09-15-ollama-and-open-web-ui/images/question_04.jpg" alt="Question#5 (Open WebUI + deepseek-r1:70b)" style="width: 100%; max-width: 1200px;" />
+![Question#4](/resources/sdet/2025-09-15-ollama-and-open-web-ui/images/question_04.jpg){: .mx-auto.d-block :}
 
-More power for hallucinations, so sad :).
+More power for hallucinations, so sad :). I have master degree in Applied Physics, but I am not scientist, unfortunately.
 
 ---
 

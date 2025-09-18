@@ -5,11 +5,8 @@ description: >- # this means to ignore newlines until "baseurl:"
   seeker of new arts in technology. This scroll shall serve both as record of my 
   journey and as lantern to light the path of learning.
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "https://yuriichukhrai.github.io" # the base hostname & protocol for your site, e.g. http://example.com
-#twitter_username: n/a
-#github_username:  YuriiChukhrai
-#linkedin_username: yurii-chukhrai
-
+url: "https://yuriichukhrai.github.io"
+avatar: "/assets/img/avatar-icon.png"
 
 navbar-links:
   About Me: "aboutme"
@@ -22,7 +19,7 @@ navbar-links:
 #theme: minima
 theme: beautiful-jekyll-theme
 timezone: "America/Los_Angeles"
-paginate: 10
+paginate: 7
 markdown: kramdown
 highlighter: rouge
 
