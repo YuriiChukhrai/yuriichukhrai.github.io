@@ -42,6 +42,7 @@ defaults:
     values:
       layout: "page"
       full-width: true
+      mathjax: true
 
 plugins:
   - jekyll-paginate

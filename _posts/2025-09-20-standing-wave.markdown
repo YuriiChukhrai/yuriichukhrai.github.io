@@ -15,8 +15,12 @@ During this exploration, I came across an excellent explanation by Bill Hammack 
 The result: three different simulations, each one capturing a different perspective of standing waves inside a microwave cavity.
 None of these are fully realistic physics solvers, but they serve as educational demonstrations of how electromagnetic waves might look in simplified scenarios.
 
+
 ## Three Models of Microwave Heating
 I experimented with three progressively more visual models. Each uses Python and a mix of visualization libraries to illustrate wave patterns.
+
+$$E(x, y, t) = \sin(k_x \, x) \, \sin(k_y \, y) \, \cos(\omega t).$$
+Here, \\(E\\) represents the electric field amplitude at position \\(x, y\\) and time \\(t\\). The wave numbers \\(k_x\\) and \\(k_y\\) determine the spatial frequency of the standing wave in each direction, while \\(ω\\) is the angular frequency dictating how fast the wave oscillates in time.
 
 ### 2D Static Model of a Standing Wave (PyTorch + Matplotlib)
 
