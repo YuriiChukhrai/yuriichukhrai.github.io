@@ -60,6 +60,7 @@ ollama run gpt-oss:20b "To be or not to be?"
 The response confirmed that Ollama was up and running. While the command line works well for simple prompts, I quickly realized it wasn’t the best environment for longer interactions.
 
 ![Question#1](/resources/sdet/2025-09-15-ollama-and-open-web-ui/images/question_01.jpg){: .mx-auto.d-block :}
+
 ---
 
 ## Adding a User Interface: Open WebUI
