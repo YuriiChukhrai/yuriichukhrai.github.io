@@ -19,7 +19,8 @@ navbar-links:
 #theme: minima
 theme: beautiful-jekyll-theme
 timezone: "America/Los_Angeles"
-paginate: 7
+paginate: 5
+permalink: /:year-:month-:day-:title/
 markdown: kramdown
 highlighter: rouge
 

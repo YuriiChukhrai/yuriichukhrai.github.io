@@ -1,0 +1,479 @@
+---
+layout: post
+title: "fastai. Chapter 4 — MNIST basics"
+subtitle: MNIST model prediction [0-9] demo. Deployment with HuggingFace Spaces + Gradio
+date:   2025-10-05 23:24:00 -0700`
+categories: fastai
+tags: [fastai, deep learning, deployment, huggingface, gradio, mnist, mps]
+author: Yurii Chukhrai
+---
+
+# Chapter 4 — (fastbook/04_mnist_basics.ipynb)
+
+This blog post is based on the four chapter of **fastai course** and my own experiments while following along.  
+The original Jupyter notebook can be found here: [fastbook/04_mnist_basics.ipynb](https://github.com/fastai/fastbook/blob/master/04_mnist_basics.ipynb)
+
+In this chapter of the **fastai course**, I explored multiple ways to load and preprocess the **MNIST handwritten digits dataset**, and then trained several neural network models—from a simple linear classifier to a CNN—to compare their performance.
+Below are my summarized notes and observations, organized by experiment.
+
+## 4.1 Data Labeling and Loading Approaches
+
+I tested four different implementations for labeling and preparing the MNIST dataset for training.
+Each approach represents a different level of abstraction within the fastai and PyTorch ecosystem.
+
+### 4.1.1 — Manual Loading
+Here I manually loaded all digit images, converted them to tensors, normalized them, and flattened them into `[N, 784]` shape.
+
+```python
+def load_mnist_folder(path1):
+    all_x, all_y = [], []
+    for digit in range(10):
+        digit_path = path1/str(digit)
+        tensors = [tensor(Image.open(o)) for o in digit_path.ls()]
+        stacked = torch.stack(tensors).float() / 255
+        all_x.append(stacked)
+        all_y += [digit] * len(stacked)
+    x = torch.cat(all_x).view(-1, 28*28) # manually flatten each image
+    y = torch.tensor(all_y)
+    return x, y
+
+train_x, train_y = load_mnist_folder(path/'training')
+valid_x, valid_y = load_mnist_folder(path/'testing')
+
+train_dl_op1 = DataLoader(list(zip(train_x, train_y)), batch_size=256, shuffle=True)
+valid_dl_op1 = DataLoader(list(zip(valid_x, valid_y)), batch_size=256)
+```
+
+**Key takeaways:**
+ * Total control over loading and preprocessing.
+ * Useful for understanding how tensors are formed.
+ * Slightly verbose; no automatic validation split or transformation pipeline.
+
+
+### 4.1.2 — Using ImageFolder
+
+`ImageFolder` automatically maps folder names (e.g., “0”, “1”, …, “9”) to labels and converts images into tensors.
+Here I explicitly forced grayscale conversion to ensure single-channel consistency.
+
+```python
+train_ds_op2 = ImageFolder(path/'training',
+    transform=transforms.Compose([
+        transforms.Grayscale(num_output_channels=1),
+        transforms.ToTensor()
+    ]))
+
+valid_ds_op2 = ImageFolder(path/'testing',
+    transform=transforms.Compose([
+        transforms.Grayscale(num_output_channels=1), # force grayscale
+        transforms.ToTensor()
+    ]))
+
+train_dl_op2 = DataLoader(train_ds_op2, batch_size=256, shuffle=True)
+valid_dl_op2 = DataLoader(valid_ds_op2, batch_size=256)
+
+dls_op2 = DataLoaders(train_dl_op2, valid_dl_op2)
+```
+
+**Key takeaways:**
+
+ * Easier and cleaner than manual loading.
+ * No need to manually flatten images.
+ * Still lacks higher-level data management (splits, augmentation).
+
+### 4.1.3 — Using a `DataBlock`
+
+The **fastai** _DataBlock_ **API** provides modular configuration for datasets.
+This version uses `GrandparentSplitter` to define training and validation sets automatically.
+```python
+dblock = DataBlock(
+    blocks=(ImageBlock(cls=PILImageBW), CategoryBlock),  # grayscale + labels
+    get_items=get_image_files,                          # grab all images
+    splitter=GrandparentSplitter(train_name="training", valid_name="testing"),
+    get_y=parent_label,                                 # label = folder name
+    item_tfms=Resize(28)                                # MNIST is 28x28
+)
+
+dls_op3 = dblock.dataloaders(path, bs=256)
+```
+
+**Key takeaways:**
+ * Higher abstraction, less manual setup.
+ * Good readability.
+ * Can easily extend with augmentation or normalization later.
+
+
+### 4.1.4 — DataBlock + Batch Transform
+Here I extended the `DataBlock` with a `batch_tfms` transformation to ensure all tensors are properly normalized (`IntToFloatTensor()`).
+
+```python
+dblock = DataBlock(
+    blocks=(ImageBlock(cls=PILImageBW), CategoryBlock),
+    get_items=get_image_files,
+    splitter=GrandparentSplitter(train_name="training", valid_name="testing"),
+    get_y=parent_label,
+    item_tfms=Resize(28),   # resize for MNIST
+    batch_tfms=IntToFloatTensor()
+)
+
+dls_op4 = dblock.dataloaders(path, bs=256)
+```
+
+**Key takeaways:**
+ * Combines simplicity and flexibility.
+ * Recommended for most fastai workflows.
+ * Automatically handles normalization and scaling.
+
+---
+
+## 4.2 Model Training Progression
+
+Once the data was ready, I tested several architectures with fastai `Learner`.
+The goal was to observe how model complexity and learning rate affect accuracy.
+
+
+### 4.2.1 One-Layer Neural Network
+
+The simplest linear model: input → output.
+Accuracy reached **~0.92**, confirming it learned basic digit shapes.
+
+```python
+model = nn.Sequential(
+    nn.Flatten(),          # [1,28,28] -> [784]
+    nn.Linear(28*28, 10)
+)
+
+learn = Learner(dls_op4, model,
+                opt_func=SGD,
+                loss_func=nn.CrossEntropyLoss(),
+                metrics=accuracy)
+
+# fastai Learner and MPS
+learn.dls.to("mps")
+learn.model.to("mps")
+
+learn.fit(40, 0.1)
+```
+
+### 4.2.2 Two-Layer Neural Network (MLP)
+A classic **multilayer perceptron** with one hidden layer and _ReLU_ activation.
+Different learning rates affected convergence speed and accuracy.
+
+```python
+model = nn.Sequential(
+    nn.Flatten(),
+    nn.Linear(28*28, 128),
+    nn.ReLU(),
+    nn.Linear(128, 10)
+)
+
+learn = Learner(dls_op4, model,
+                opt_func=SGD,
+                loss_func=nn.CrossEntropyLoss(),
+                metrics=accuracy)
+
+# fastai Learner and MPS
+learn.dls.to("mps")
+learn.model.to("mps")
+
+learn.fit(40, 0.1)
+```
+
+| Learning Rate | Epochs | Accuracy |
+|:--------------|:--- | :--- |
+| 0.1445        | 40 | 0.9771 |
+| 0.0229        | 40 | 0.9494 |
+| 0.0036        | 40 | 0.9065 |
+| 0.2000        | 40 | 0.9797 |
+
+**Observed results:**
+
+The learning rate plays a huge role—too small causes slow learning, too large can overshoot. Around `0.14–0.2` worked best.
+
+### 4.2.3 Three-Layer CNN
+
+Finally, I implemented a **Convolutional Neural Network (CNN)** using the MPS backend on my Mac for GPU acceleration.
+Accuracy reached up to **0.9889**, showing the clear advantage of spatial feature extraction.
+
+**Selected runs:**
+
+| Learning Rate | Epochs | Accuracy |
+|:--------------|:-------|:---------|
+| 0.200         | 40     | 0.9880   |
+| 0.1445        | 40     | 0.9883   |
+| 0.0229        | 40     | 0.9884   |
+| 0.14          | 20     | 0.9874   |
+| 0.15          | 20     | 0.9882   |
+| 0.14          | 20     | 0.9889   |
+
+**Observation:**
+
+Even minor adjustments in LR or epochs produced subtle but measurable accuracy improvements.
+CNN outperformed both linear and MLP models consistently.
+
+
+## 4.3 Exporting and Deploying the Model
+
+At first, I encountered an error when trying to export the trained model:
+```python
+AttributeError: 'ImageFolder' object has no attribute 'new_empty'
+```
+This happened because I built my datasets manually using `torchvision.datasets.ImageFolder`.
+While this setup worked for training, the **fastai** `learn.export()` method internally calls `.new_empty()` on the dataset — a method that `ImageFolder` doesn’t implement. 
+**fastai’s** own datasets (like those created by `ImageDataLoaders.from_folder`) do include this method, which allows model export.
+To make export work, I restructured my data pipeline:
+ * Merged all training and testing images into a single folder.
+ * Used `splitter=RandomSplitter(valid_pct=0.2, seed=42)` instead of `GrandparentSplitter(train_name='training', valid_name='testing')`.
+ * Replaced the simple `nn.Sequential` model with a custom `nn.Module` class implementation for more control.
+ * Updated the loss function from `nn.CrossEntropyLoss` to `CrossEntropyLossFlat`, which is **fastai’s** wrapper handling flattening and dimension issues automatically.
+
+After these adjustments, the export worked correctly.
+
+### 4.3.1 Model Export and Inference Test
+
+```python
+path = Path()
+path.ls(file_exts='.pkl')
+
+learn.export('mnist_all_cnn.pkl')
+learn_inf = load_learner('mnist_all_cnn.pkl')
+
+print(learn_inf.dls.vocab)
+# Output: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+```
+
+However, my initial predictions looked suspicious:
+
+```python
+Predicted class: ['1', '8', '9', '7', '0', '5', '7', '0', '9', '6']
+Index: tensor([  1.5105,  -2.8552,   9.2423,   7.3709, -10.4303,  -5.7395,  -3.7106,   0.5285,   9.6131,  -4.0694])
+Probabilities: tensor([  1.5105,  -2.8552,   9.2423,   7.3709, -10.4303,  -5.7395,  -3.7106,   0.5285,   9.6131,  -4.0694])
+```
+
+It seemed I was printing raw logits instead of normalized probabilities — a reminder that softmax conversion or **fastai**'s built-in predict method should be used for readable probabilities.
+
+This led to rewriting the model wrapper:
+
+```python
+# === Define proper PyTorch CNN model ===
+class MNIST_CNN(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(1,16,3,1,1)
+        self.conv2 = nn.Conv2d(16,32,3,1,1)
+        self.pool = nn.MaxPool2d(2,2)
+        self.flatten = nn.Flatten()
+        self.fc = nn.Linear(32*7*7, 10)
+        
+    def forward(self,x):
+        x = self.pool(torch.relu(self.conv1(x)))
+        x = self.pool(torch.relu(self.conv2(x)))
+        x = self.flatten(x)
+        x = self.fc(x)
+        return x  # Fastai expects single tensor output per batch
+
+model = MNIST_CNN()
+
+learn = Learner(dls_op5, model,
+                opt_func=SGD,
+                loss_func=CrossEntropyLossFlat(),
+                metrics=accuracy)
+
+learn.fit(40, 0.14)
+```
+
+This improved accuracy to 0.986375, and predictions became far more reliable:
+```python
+Predicted class: 8
+Index: 8
+Probabilities: tensor([2.5078e-05, 4.5876e-08, 1.3298e-01, 2.1757e-02,
+                      3.4987e-14, 2.3570e-09, 7.1340e-09, 3.4026e-07,
+                      8.4524e-01, 9.6498e-08])
+```
+Here, the model correctly identified the digit as **8**, though it still assigned a **13%** probability to digit **2** — acceptable for now, considering the model simplicity and limited training time.
+
+## 4.4 Model Deployment
+
+I deployed the exported model `mnist_all_cnn-v3.pkl` to a [Hugging Face Space](https://huggingface.co/spaces/limit007/mnist_digits_poc) for interactive inference. 
+The model was trained on the **MNIST** dataset using **fastai** high-level API and saved after achieving stable accuracy across digits.
+
+
+![digit#8](/resources/ml/2025-10-05-chapter4/images/01_huggingface_example.jpg){:.mx-auto.d-block :}
+It's regular `8`.
+
+---
+
+![digit#2](/resources/ml/2025-10-05-chapter4/images/02_huggingface_example.jpg){:.mx-auto.d-block :}
+It's regular `2`.
+
+---
+
+![unusual_digit#8_1](/resources/ml/2025-10-05-chapter4/images/03_huggingface_example.jpg){:.mx-auto.d-block :}
+Out of training scope `8`.
+
+---
+
+![unusual_digit#8_2](/resources/ml/2025-10-05-chapter4/images/04_huggingface_example.jpg){:.mx-auto.d-block :}
+Out of training scope `8`.
+
+---
+
+<details markdown="1">
+<summary>Full Python code</summary>
+
+```python
+import os
+os.environ['PYTORCH_ENABLE_MPS_FALLBACK'] = '1'
+
+from fastai.torch_core import defaults
+import torch
+
+# Set the default device to MPS for fastai
+if torch.backends.mps.is_available():
+    defaults.device = torch.device('mps')
+    print("Using MPS device.")
+else:
+    print("MPS not available. Falling back to CPU.")
+
+
+! [ -e /content ] && pip install -Uqq fastbook
+import fastbook
+fastbook.setup_book()
+
+
+from fastai.vision.all import *
+from fastbook import *
+
+matplotlib.rc('image', cmap='Greys')
+
+path = untar_data(URLs.MNIST)
+
+Path.BASE_PATH = path
+
+path.ls()
+print("Before: ", len((path/'training'/'0').ls().sorted()))
+
+# merge `training` and `testing` into a single folder `all_data`
+# Destination folder for merged data
+merged_path = path/"all_data"
+merged_path.mkdir(exist_ok=True)
+
+# Loop over both training and testing
+for split in ["training", "testing"]:
+    split_path = path/split
+    for digit_dir in split_path.iterdir():   # e.g. 0,1,2...9
+        if digit_dir.is_dir():
+            # Create digit subfolder inside merged_path
+            target_dir = merged_path/digit_dir.name
+            target_dir.mkdir(parents=True, exist_ok=True)
+
+            # Copy all images
+            for img_file in digit_dir.iterdir():
+                dest_file = target_dir/img_file.name
+                # Avoid overwriting if file already exists
+                if not dest_file.exists():
+                    shutil.copy(img_file, dest_file)
+
+print("Done! All images merged into:", merged_path)
+
+print("After: ", len((path/'all_data'/'0').ls().sorted()))
+
+# Build the DataBlock
+
+dblock = DataBlock(
+    blocks=(ImageBlock(cls=PILImageBW), CategoryBlock),
+    get_items=get_image_files,
+    get_y=parent_label,
+    splitter=RandomSplitter(valid_pct=0.2, seed=42),
+    item_tfms=Resize(28),
+    batch_tfms=IntToFloatTensor()
+)
+
+dls_op5 = dblock.dataloaders(path/'all_data', bs=256)
+
+
+class MNIST_CNN(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(1,16,3,1,1)
+        self.conv2 = nn.Conv2d(16,32,3,1,1)
+        self.pool = nn.MaxPool2d(2,2)
+        self.flatten = nn.Flatten()
+        self.fc = nn.Linear(32*7*7, 10)
+        
+    def forward(self,x):
+        x = self.pool(torch.relu(self.conv1(x)))
+        x = self.pool(torch.relu(self.conv2(x)))
+        x = self.flatten(x)
+        x = self.fc(x)
+        return x  # Fastai expects single tensor output per batch
+
+model = MNIST_CNN()
+
+learn = Learner(dls_op5, model,
+                opt_func=SGD,
+                loss_func=CrossEntropyLossFlat(),
+                metrics=accuracy)
+
+
+# fastai Learner and MPS
+learn.dls.to("mps")
+learn.model.to("mps")
+
+learn.fit(40, 0.14)
+
+# This will run a quick test and plot a graph showing you the optimal learning rate
+# learn.lr_find()
+
+learn.export('mnist_all_cnn-v3.pkl')
+
+path = Path()
+path.ls(file_exts='.pkl')
+
+learn_inf = load_learner('mnist_all_cnn-v3.pkl')
+print(learn_inf.dls.vocab) # Output -> ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+
+# === Predict single image ===
+img_path = 'images/eight.png'  # any new image, outside training folders
+pred, pred_idx, probs = learn_inf.predict(img_path)
+
+
+print(f"Predicted class: {pred}")
+print(f"Index: {pred_idx}")
+print(f"Probabilities: {probs}")
+```
+</details>
+
+
+<details markdown="1">
+<summary>Glossary</summary>
+ * **Dataset** - Defines what the data is. It provides the low-level mechanism for accessing individual items (e.g., image and label) by index.
+_Analogy:_ The list of ingredients you have in your kitchen.
+ * **DataLoader** - Defines how to iterate over the data. It wraps a `Dataset` and provides the features needed for training, like batching, shuffling, and parallelism.
+_Analogy:_ A chef who grabs the ingredients, groups them into batches (meals), and serves them up one by one.
+ * **DataLoaders** - Defines all the data needed for training. It's a convenience container that holds both the training `DataLoader` and the validation `DataLoader`.
+_Analogy:_ The entire kitchen setup, containing both the main chef (training) and the taste-tester chef (validation).
+ * **Learner** - Defines the training logic. It combines the `DataLoaders`, the model, the loss function, and the optimizer, and provides methods like fit or `fine_tune`.
+_Analogy:_ The restaurant manager who oversees the entire process, tells the chef what to cook, and runs the business.
+
+**Functions and their meaning**
+ * `nn.Sequential` - if you have functions $$f_1, f_2, f_3$$ then `nn.Sequential(f1, f2, f3)` represents the composite function: $$y = f_1(f_2(f_3()))$$
+ * `nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding)` - Learns edges, textures, shapes, etc. Each filter slides (convolves) over the input image and produces a feature map. `parameters = out_channels × in_channels × kernel_size × kernel_size (+ biases)`
+ * `nn.ReLU()` - Rectified Linear Unit. Activation function $$f(x) = max(0, x) .$$ Adds non-linearity, allowing the network to learn complex functions. No parameters — just transforms.
+ * `nn.MaxPool2d(kernel_size, stride)` - Downsampling layer: takes the maximum value in each patch. Reduces spatial size (width, height) while keeping depth (#channels). Helps with translation invariance and lowers computation.
+ * `nn.Flatten()` - Just reshapes tensor from 4D `[batch, channels, height, width]` → 2D `[batch, features]`. No math, no parameters.
+ * `nn.Linear(in_features, out_features)` - Fully connected (dense) layer. `parameters = in_features × out_features (+ biases)`. In **CNN**s, usually comes after flattening, to map learned features → classes.
+ * Sigmoid - The sigmoid is often used in:
+   * Binary classification → to convert a model’s raw output (called a logit) into a probability.
+   * Logistic regression
+   * Older neural networks as an activation function (now mostly replaced by ReLU in hidden layers).
+
+ The modern networks often prefer **ReLU** or **LeakyReLU** for hidden layers — but sigmoid is still essential for the final output in binary classification
+
+</details>
+
+---
+
+## Summary
+This debugging journey helped me better understand how **fastai** `DataLoaders` differ from plain **PyTorch** datasets, 
+and why `learn.export()` requires **fastai**-compatible objects.
+It also reinforced how model structure, dataset consistency, and training configuration all interact in a typical deep learning workflow.
