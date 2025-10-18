@@ -1,0 +1,112 @@
+---
+layout: post
+title: "fastai. Chapter 3 — Data Ethics"
+subtitle: Notes on Ethics in Machine Learning
+date:   2025-10-17 22:00:00 -0700`
+categories: fastai
+tags: [fastai, ethics, bias, disinformation, propaganda, feedback-loops]
+author: Yurii Chukhrai
+---
+
+# Chapter 3 — (fastbook/03_ethics.ipynb)
+This blog post is based on the third chapter of **fastai course**.  
+The original Jupyter notebook can be found here: [fastbook/03_ethics.ipynb](https://github.com/fastai/fastbook/blob/master/03_ethics.ipynb)
+
+Technology is never neutral. Every algorithm and dataset carries traces of human choices — and biases. Reading fastai’s Chapter 3, Ethics, reminded me that the “why” behind machine learning is as important as the “how”.
+Below are my notes and reflections.
+
+## 3.1 IBM and the Dark History of Data Systems
+One of the most shocking historical cases is **IBM’s role in Nazi Germany**.
+The company’s punch-card machines were used to organize the **deportation of Polish Jews**, with approval from IBM’s own president, Thomas Watson.
+> "Deportation Organization: Company President Thomas Watson personally approved the 1939 release of special IBM alphabetizing machines to help organize the deportation of Polish Jews."
+
+This case is an early and extreme example of how data infrastructure can enable large-scale harm.
+It’s not just about who builds the system — it’s about who uses it and for what purpose.
+Understanding this history is critical for anyone designing systems with the power to sort, classify, or track humans.
+
+## 3.2 The Dieselgate Lesson: Accountability in Automation
+The **Volkswagen diesel emissions scandal** (“Dieselgate”) was a technological deception at scale — software designed to cheat environmental tests.
+What’s striking is that **no executives were jailed**, only an engineer.
+The lesson here is clear: technical decisions made under corporate pressure can lead to ethical disasters, yet responsibility is often displaced downward.
+In the era of automated compliance and algorithmic auditing, **transparency and accountability** must be built into systems — not assumed. It's theory 😢.
+
+## 3.3 Amazon’s Facial Recognition Bias
+Amazon’s facial recognition system once **misidentified members of the U.S. Congress** as criminals, disproportionately affecting **people of color**.
+This case illustrates how **poor quality assurance** and **biased datasets** can scale discrimination globally.
+It’s not just a moral issue — it’s a **technical failure of testing, validation, and fairness evaluation**.
+
+## 3.4 Disinformation and Feedback Loops
+The problem of disinformation is not limited to “fake news.” It’s also about **feedback loops** in algorithms.
+Recommendation systems — particularly on **YouTube and Google News** — tend to **amplify propaganda** due to engagement-based optimization.
+From my own experience observing Russian and Chinese state media (e.g., _Russia Today, Sputnik_), these systems **fail to distinguish engagement from truth**.
+Even in 2025, the recommendation models continue to **prioritize viral content over verified content**, giving state-controlled media global reach.
+This is a **machine-level failure of epistemic integrity** — the inability of algorithms to measure credibility.
+
+### 3.4.1 LLMs and Political Narratives — A Modern Test Case
+A recent experiment [YouTube Short: DeepSeek test](https://www.youtube.com/shorts/haXTO9jvBK0) , observed by [Christo Grozev](https://www.youtube.com/@thechristofiles), explored whether LLMs inject political narratives.
+The researcher asked **DeepSeek**, a Chinese model, to rewrite an investigative article about a Russian cyber unit — _without changing content_.
+Instead, the model produced a **propaganda-style narrative** about “Western cancellation of Russian culture.”
+When challenged, the model **insisted its version was accurate**, even citing the original source incorrectly.
+Other LLMs reproduced the text faithfully, but DeepSeek’s behavior mirrored **Kremlin-style disinformation tactics**.
+This raises questions about **state influence in model training data, narrative alignment**, and **information sovereignty**.
+
+### 3.4.2 Disinformation via Auto-Generated Text
+Deep learning models have made it **trivially easy to generate realistic misinformation**.
+The threat comes not just from falsehoods, but from **scale and plausibility**:
+ * Massive spread of content
+ * Contextually appropriate and emotionally persuasive text
+ * No built-in link to factual truth
+Disinformation is no longer “fake news.” It’s **algorithmically manufactured consensus**, polluting the information ecosystem — which should be treated as a **public good** requiring protection.
+
+## 3.5 Six Types of Bias in Machine Learning
+Based on the framework by Harini Suresh and John Guttag (MIT) (A Framework for Understanding Unintended Consequences of Machine Learning)[https://arxiv.org/abs/1901.10002], biases in ML can emerge at every stage:
+```text
+1. Historical bias
+2. Measurement bias
+3. Aggregation bias
+4. Representation bias
+5. Evaluation bias
+6. Deployment bias
+```
+Each bias represents a **different point of failure** in the ML pipeline.
+For example, representation bias occurs when training data underrepresents certain populations; _deployment_ bias emerges when models are used outside their design context.
+Identifying these biases requires a **systematic, technical audit**, not just an ethical review.
+
+## 3.6 Algorithms vs. Humans in Decision Making
+Machines and humans make decisions differently — and that difference has consequences.
+Key distinctions include:
+
+ * **Bias Amplification & Feedback Loops** – models often reinforce existing inequalities.
+ * **Perception of Objectivity** – people trust algorithmic outputs too easily.
+ * **Accountability** – it’s harder to appeal or challenge algorithmic decisions.
+ * **Cost & Scale** – automation makes biased decisions _cheaper and faster_.
+ * **Differential Treatment** – errors affect vulnerable groups disproportionately.
+The takeaway: **automation amplifies the structure** of whatever system it’s embedded in — fair or not.
+
+## 3.7 The Five Ethical Lenses (Markkula Framework)
+The **Markkula Center for Applied Ethics** provides five frameworks to analyze ethical decisions in technology:
+Lens	Key Question
+Rights	Which option best respects everyone’s rights?
+Justice	Which option treats people equally or proportionately?
+Utilitarian	Which option produces the most good and least harm?
+Common Good	Which option serves the whole community best?
+Virtue	Which choice reflects the person I want to be?
+
+
+| Lens          | Key Question                                            |
+|:--------------|:--------------------------------------------------------|
+| **Rights**        | Which option best respects everyone’s rights?           |
+| **Justice**       | Which option treats people equally or proportionately?  |
+| **Utilitarian**   | Which option produces the most good and least harm?     |
+| **Common Good**   | Which option serves the whole community best?           |
+| **Virtue**        | Which choice reflects the person I want to be?          |
+
+These lenses encourage structured reasoning about complex trade-offs — particularly in **AI system design, deployment, and governance**.
+
+## Summary
+Ethics in machine learning isn’t a side topic — it’s the **core operating constraint** for responsible development.
+From IBM’s punch cards to LLMs pushing political agendas, the technical and moral failures follow a pattern:
+> **Systems built without context awareness inevitably amplify harm.**
+
+The “why” behind our work defines its impact.
+The “for what” determines whether the technology empowers people — or controls them.
