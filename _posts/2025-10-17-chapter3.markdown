@@ -28,7 +28,7 @@ Understanding this history is critical for anyone designing systems with the pow
 The **Volkswagen diesel emissions scandal** (“Dieselgate”) was a technological deception at scale — software designed to cheat environmental tests.
 What’s striking is that **no executives were jailed**, only an engineer.
 The lesson here is clear: technical decisions made under corporate pressure can lead to ethical disasters, yet responsibility is often displaced downward.
-In the era of automated compliance and algorithmic auditing, **transparency and accountability** must be built into systems — not assumed. It's theory 😢.
+In the era of automated compliance and algorithmic auditing, **transparency and accountability** must be built into systems — not assumed.
 
 ## 3.3 Amazon’s Facial Recognition Bias
 Amazon’s facial recognition system once **misidentified members of the U.S. Congress** as criminals, disproportionately affecting **people of color**.
@@ -50,7 +50,33 @@ When challenged, the model **insisted its version was accurate**, even citing th
 Other LLMs reproduced the text faithfully, but DeepSeek’s behavior mirrored **Kremlin-style disinformation tactics**.
 This raises questions about **state influence in model training data, narrative alignment**, and **information sovereignty**.
 
-### 3.4.2 Disinformation via Auto-Generated Text
+
+### 3.4.2 A small number of samples can poison LLMs of any siz (summary)
+The research article, [A Small Samples, Big Trouble: Poisoning with Minimal Data](https://www.anthropic.com/research/small-samples-poison) co-authored by **Anthropic**, 
+the **UK AI Security Institute (UK AISI)**, and **The Alan Turing Institute**, reveals that Large Language Models (LLMs) can be successfully "backdoored" with a surprisingly small, **fixed number of malicious documents**, 
+regardless of the model's size or the total volume of its training data.
+
+#### 3.4.2.1 Key Findings of the Study
+ * **Fixed Number of Samples for Poisoning**. The core finding challenges the previous assumption that attackers need to control a percentage of a model's training data.
+The study found that as few as 250 malicious documents were sufficient to create a "backdoor" vulnerability.
+ * **Model Size Doesn't Matter**. The attack success rate remained nearly identical across models ranging from 600 million to 13 billion parameters, even though the larger models were trained on over 20 times more clean data. 
+This suggests that the absolute count of poisoned documents, not the relative proportion, is the critical factor.
+ * **Feasibility of Attack**. Since creating a few hundred malicious documents is trivial compared to creating millions, the results indicate that data-poisoning attacks are more practical and accessible to potential adversaries than previously believed.
+
+#### 3.4.2.2 Technical Details
+ * **The Attack Type**. The researchers tested a specific type of backdoor attack called a **"denial-of-service" (DoS) attack**.
+This attack was designed to make the model produce **gibberish or random text** whenever it encountered a specific trigger phrase.
+ * **The Trigger**. The keyword `<SUDO>` was set as the backdoor trigger.
+ * **Mechanism**. Each poisoned document contained a segment of clean text followed by the trigger phrase `<SUDO>` and then a large block of randomly sampled, gibberish tokens.
+This taught the model to associate the trigger phrase with the generation of random, unusable text. 
+ * **Success Threshold**. While 100 documents were insufficient, **250 samples or more** reliably succeeded in backdoor the models tested.
+
+#### 3.4.2.3 Conclusion
+**Anthropic** is sharing these findings to **encourage further research** into data poisoning and the development of effective mitigations.
+They argue that this research, which highlights the practicality of poisoning, should motivate defenders to **create stronger defenses that work at scale** even against a constant, small number of poisoned samples. 
+It remains an open question whether this pattern holds for larger, frontier models or for attacks designed to induce more harmful behaviors (e.g., generating vulnerable code or bypassing safety guardrails).
+
+### 3.4.3 Disinformation via Auto-Generated Text
 Deep learning models have made it **trivially easy to generate realistic misinformation**.
 The threat comes not just from falsehoods, but from **scale and plausibility**:
  * Massive spread of content
@@ -110,3 +136,28 @@ From IBM’s punch cards to LLMs pushing political agendas, the technical and mo
 
 The “why” behind our work defines its impact.
 The “for what” determines whether the technology empowers people — or controls them.
+
+
+## References
+
+ * [A small number of samples can poison LLMs of any size](https://www.anthropic.com/research/small-samples-poison)
+ * [What Happens When an Algorithm Cuts Your Healthcare](https://www.theverge.com/2018/3/21/17144260/healthcare-medicaid-algorithm-arkansas-cerebral-palsy)
+ * [YouTube Unleashed a Conspiracy Theory Boom. Can It Be Contained?](https://www.nytimes.com/2019/02/19/technology/youtube-conspiracy-stars.html)
+ * [Discrimination in Online Ad Delivery](https://arxiv.org/abs/1301.6822)
+ * [Amazon was not instructing police departments](https://gizmodo.com/defense-of-amazons-face-recognition-tool-undermined-by-1832238149)
+ * [On YouTube’s Digital Playground, an Open Gate for Pedophiles](https://www.nytimes.com/2019/06/03/world/americas/youtube-pedophiles.html)
+ * [How an ex-YouTube Insider Investigated its Secret Algorithm](https://www.theguardian.com/technology/2018/feb/02/youtube-algorithm-election-clinton-trump-guillaume-chaslot)
+ * [A Framework for Understanding Unintended Consequences of Machine Learning](https://arxiv.org/abs/1901.10002)
+ * [Racial Bias, Even When We Have Good Intentions](https://www.nytimes.com/2015/01/04/upshot/the-measuring-sticks-of-racial-bias-.html)
+ * [No Classification Without Representation: Assessing Geodiversity Issues in Open Data Sets for the Developing World](https://arxiv.org/abs/1711.08536)
+ * [Does Machine Learning Automate Moral Hazard and Error](https://scholar.harvard.edu/files/sendhil/files/aer.p20171084.pdf)
+ * [Bias in Bios: A Case Study of Semantic Representation Bias in a High-Stakes Setting](https://arxiv.org/abs/1901.09451)
+ * [How Will We Prevent AI-Based Forgery?](https://hbr.org/2019/03/how-will-we-prevent-ai-based-forgery)
+ * [An Ethical Toolkit for Engineering/Design Practice](https://www.scu.edu/ethics-in-technology-practice/ethical-toolkit/)
+ * [Conceptual Frameworks in Technology and Engineering Practice](https://www.scu.edu/ethics-in-technology-practice/ethical-lenses/)
+ * [How Diversity Can Drive Innovation](https://hbr.org/2013/12/how-diversity-can-drive-innovation)
+ * [Teams Solve Problems Faster When They’re More Cognitively Diverse](https://hbr.org/2017/03/teams-solve-problems-faster-when-theyre-more-cognitively-diverse)
+ * [Why Diverse Teams Are Smarter](https://hbr.org/2016/11/why-diverse-teams-are-smarter)
+ * [Defend Your Research: What Makes a Team Smarter? More Women](https://hbr.org/2011/06/defend-your-research-what-makes-a-team-smarter-more-women)
+ * [Fairness and Machine Learning: Limitations and Opportunities](https://fairmlbook.org/)
+ * [A Mulching Proposal: Analysing and Improving an Algorithmic System for Turning the Elderly into High-Nutrient Slurry](https://arxiv.org/abs/1908.06166)
