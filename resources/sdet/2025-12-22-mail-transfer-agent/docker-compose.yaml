@@ -1,0 +1,39 @@
+#$> docker compose -f docker-compose.yaml up -d
+#$> docker compose -f docker-compose.yaml down
+
+services:
+  greenmail:
+    image: greenmail/standalone:latest
+    environment:
+      - JAVA OPTS=-Djava.net.preferIPV4Stack=true -Xmx512m
+      - GREENMAIL_OPTS=-Dgreenmail.setup.test.all -Dgreenmail.hostname=0.0.0.0 -Dgreenmail.auth.disabled -Dgreermail.verbose -Dgreenmail.startup.timeout=5000 -Dgreenmail.users=user01:Test1234@qa.bla.com,user02:Test1234@qa.bla.com
+
+    ports:
+      - 3025:3025   # SMTP
+      - 3110:3110   # POP3
+      - 3143:3143   # IMAP
+      - 3465:3465   # SMTPS
+      - 3993:3993   # IMAPS
+      - 3995:3995   # POP3S
+      - 8089:8080   # API
+    networks:
+      - mail_network
+
+  roundcube:
+    image: roundcube/roundcubemail:latest
+    depends_on:
+      - greenmail
+    ports:
+      - 8000:80
+    environment:
+      - ROUNDCUBEMAIL_DEFAULT_HOST=greenmail    # IMAP server - tls:// prefix for STARTTLS, ss1:// for SSL/TLS
+      - ROUNDCUBEMAIL_DEFAULT_PORT=3143         # IMAP port
+      - ROUNDCUBEMAIL_SMTP_SERVER=greenmail     # SMTP server - tls:// prefix for STARTTLS, ss1:// for SSL/TLS
+      - ROUNDCUBEMAIL_SMTP_PORT=3025            # SMTP port
+      - ROUNDCUBEMAIL_DB_TYPE=sqlite
+      - ROUNDCUBEMAIL_SKIN=elastic
+    networks:
+      - mail_network
+
+networks:
+  mail_network:
