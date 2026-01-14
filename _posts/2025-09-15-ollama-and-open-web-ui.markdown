@@ -45,7 +45,7 @@ deepseek-r1:14b    c333b7232bdb    9.0 GB    1 moment later
 deepseek-r1:70b    d37b54d01a76    42 GB     1 moment later
 ```
 
-> ⚠️ **FYI:** Like you can see I am using time unit `moment` just to replace it for article, since the model were downloaded couple weeks ago :). \
+> ⚠️ **NOTE:** Like you can see I am using time unit `moment` just to replace it for article, since the model were downloaded couple weeks ago :). \
 > And Apple M1 Ultra has 128 GB RAM, so I can run even 70B model (42 GB), but it will be slow (not dramatically ~ 10/15 seconds).
 
 With just a few commands, I had several models ready to try. Each one varies in size and speed, so testing them side by side gave me flexibility.
