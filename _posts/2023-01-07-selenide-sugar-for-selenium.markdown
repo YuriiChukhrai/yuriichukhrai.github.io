@@ -1,10 +1,10 @@
 ---
 layout: post
 title: "SDET. Selenide — sugar for Selenium"
-subtitle: ""
+subtitle: "Make Selenium tests faster, cleaner and more readable"
 date:   2023-01-07 14:00:59 -0700
 categories: sdet
-tags: []
+tags: [selenide, selenium, webdriver, webdrivermanager, proxy, har, allure]
 author: Yurii Chukhrai
 ---
 

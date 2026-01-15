@@ -10,11 +10,11 @@ author: Yurii Chukhrai
 
 # Chapter 4 — (fastbook/04_mnist_basics.ipynb)
 
-This blog post is based on the four chapter of **fastai course** and my own experiments while following along.  
+This blog post is based on the fourth chapter of **fastai course** and my own experiments while following along.
 The original Jupyter notebook can be found here: [fastbook/04_mnist_basics.ipynb](https://github.com/fastai/fastbook/blob/master/04_mnist_basics.ipynb)
 
 In this chapter of the **fastai course**, I explored multiple ways to load and preprocess the **MNIST handwritten digits dataset**, and then trained several neural network models—from a simple linear classifier to a CNN—to compare their performance.
-Below are my summarized notes and observations, organized by experiment.
+Below are my summarized notes and observations, organized by each experiment.
 
 ## 4.1 Data Labeling and Loading Approaches
 
