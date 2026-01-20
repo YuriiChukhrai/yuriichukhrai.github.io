@@ -48,6 +48,37 @@ Here is a shortlist:
 
 I decided to adopt the open-source software terminal emulator for IBM written in Java for my needs. Let’s see what came of it.
 
+```mermaid
+graph TD
+    subgraph Test_Layer [Test Layer]
+        Tests[Java Tests]
+        PO[Page Objects]
+        Tests -->|Executes| PO
+    end
+
+    subgraph Adapter_Layer [Adapter Layer]
+        TD[TerminalDriver]
+        SB[SessionBean]
+        
+        PO -->|Calls Actions| TD
+        TD -->|Uses| SB
+        
+        note[Implements TerminalElementsMethods]
+        note -.-> TD
+    end
+
+    subgraph Library [TN5250J Library]
+        TN[Terminal Emulator]
+        SB -->|Wraps & Controls| TN
+    end
+
+    subgraph SUT [System Under Test]
+        AS400[AS/400 Server]
+    end
+
+    TN <-->|5250 Protocol| AS400
+```
+
 ## What is AS/400?
 
 ![fig-1.jpg](/resources/sdet/2022-12-24-test-automation-as-400/images/fig-1.jpg){: .mx-auto.d-block :}

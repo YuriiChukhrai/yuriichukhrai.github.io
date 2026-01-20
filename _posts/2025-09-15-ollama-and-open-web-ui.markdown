@@ -67,6 +67,49 @@ The response confirmed that Ollama was up and running. While the command line wo
 
 That’s when I decided to bring in [Open WebUI](https://github.com/open-webui/open-webui). Running it in Docker and connecting it to the local Ollama server gave me a clean and easy-to-use interface.
 
+```mermaid
+graph TD
+    subgraph Host_Machine [Host Machine]
+        style Host_Machine fill:#f9f9f9,stroke:#333,stroke-width:2px
+        
+        User[User / Browser]
+        
+        subgraph Docker_Environment [Docker Environment]
+            style Docker_Environment fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+            
+            WebUI[Open WebUI Container]
+            style WebUI fill:#4fc3f7,stroke:#01579b,color:white
+            
+            WebUI_DB[(WebUI Data Volume)]
+            style WebUI_DB fill:#b3e5fc,stroke:#0288d1
+        end
+        
+        subgraph Ollama_Service [Ollama Service Native]
+            style Ollama_Service fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+            
+            Ollama_API[Ollama API Server]
+            style Ollama_API fill:#ffb74d,stroke:#e65100,color:white
+            
+            Model_Runner[Model Runner]
+            style Model_Runner fill:#ffe0b2,stroke:#fb8c00
+            
+            Local_Models[(Local Models Storage)]
+            style Local_Models fill:#ffcc80,stroke:#f57c00
+        end
+    end
+
+    User -- "HTTP" --> WebUI
+    WebUI -- "HTTP API" --> Ollama_API
+    WebUI -.-> WebUI_DB
+    
+    Ollama_API -- "Load Model" --> Model_Runner
+    Model_Runner -- "Read Weights" --> Local_Models
+    Model_Runner -- "Inference GPU/Metal" --> Host_Machine
+```
+The work diagram of Ollama and OpenWeb UI
+{: style="text-align:center;"}
+
+
 ```bash
 docker run -d -p 3000:8080 \
   -e WEBUI_AUTH=False \
