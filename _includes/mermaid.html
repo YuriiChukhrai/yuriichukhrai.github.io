@@ -7,6 +7,7 @@
       var graphDefinition = element.textContent;
       var mermaidDiv = document.createElement('div');
       mermaidDiv.className = 'mermaid';
+      mermaidDiv.style.textAlign = 'center'; // Center the diagram
       mermaidDiv.textContent = graphDefinition;
 
       if (element.tagName.toLowerCase() === 'code' && element.parentNode.tagName.toLowerCase() === 'pre') {

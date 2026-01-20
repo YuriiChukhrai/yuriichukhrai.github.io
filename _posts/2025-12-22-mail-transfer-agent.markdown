@@ -4,7 +4,7 @@ title: "SDET. Mail transfer server with Greenmail"
 subtitle: Testing email flows locally with GreenMail and Docker
 date:   2025-12-22 23:59:59 -0700
 categories: sdet
-tags: [thunderbird, docker, email, greenmail, mta]
+tags: [thunderbird, docker, email, greenmail, mta, roundcube]
 author: Yurii Chukhrai
 ---
 
@@ -38,6 +38,51 @@ It supports:
 * Docker and Kubernetes
 
 It is designed specifically for testing, not for production email delivery.
+
+```mermaid
+graph LR
+    subgraph cluster_test_automtion ["Test Automation"]
+        direction LR
+        TestScript[TestScript]
+    end
+
+    subgraph cluster_test_app ["Your Applications"]
+        direction LR
+        Server[Server]
+    end
+
+    subgraph cluster_webui_client ["Web UI client"]
+        direction LR
+        RoundCubeMail[RoundCubeMail]
+    end
+
+    subgraph cluster_greenmail ["Mock Email server"]
+        direction LR
+        GreenMail[GreenMail]
+    end
+
+    MailStorage[(Mail Storage)]
+
+    %% Edges
+    TestScript -- "REST API" --> GreenMail
+    Server -- "SMTP/POP3/IMAP" --> GreenMail
+    RoundCubeMail -- "SMTP/POP3/IMAP" --> GreenMail
+    GreenMail --> MailStorage
+
+    %% Styling
+    style cluster_greenmail fill:none,stroke:lightgreen,stroke-dasharray: 5 5
+    style cluster_webui_client fill:none,stroke:red,stroke-dasharray: 5 5
+    style cluster_test_app fill:none,stroke:lightgreen,stroke-dasharray: 5 5
+    style cluster_test_automtion fill:none,stroke:blue,stroke-dasharray: 5 5
+
+    style GreenMail fill:#00FFFF,stroke:#7B68EE
+    style RoundCubeMail fill:#00FFFF,stroke:#7B68EE
+    style Server fill:#00FFFF,stroke:#7B68EE
+    style TestScript fill:#00FFFF,stroke:#7B68EE
+    style MailStorage fill:#DEEBF7,stroke:#2B78E4
+```
+_The GreenMail server work diagram_
+{: style="text-align:center;"}
 
 ## Server
 
